@@ -1,131 +1,62 @@
 import { css } from '@emotion/react';
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Top, Spacing, Border, Button, Text, Select, ListRow } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
-import { getRooms, getReservations, createReservation } from 'pages/remotes';
-import { TIME_SLOTS,EQUIPMENT_LABELS } from 'pages/constants';
+import { TIME_SLOTS, EQUIPMENT_LABELS } from 'pages/constants';
 import { formatDate } from 'pages/utils';
-import axios from 'axios';
+import { useRoomBooking } from './useRoomBooking';
+import { useBookingFilters } from './useBookingFilters';
+import { validateBookingFilter, getAvailableRooms } from './utils';
 
 const ALL_EQUIPMENT = ['tv', 'whiteboard', 'video', 'speaker'];
 
 export function RoomBookingPage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const date = searchParams.get('date') || formatDate(new Date());
-  const startTime = searchParams.get('startTime') || '';
-  const endTime = searchParams.get('endTime') || '';
-  const attendees = Number(searchParams.get('attendees')) || 1;
-  const equipment = searchParams.get('equipment')?.split(',').filter(Boolean) ?? [];
-  const preferredFloor = searchParams.get('floor') ? Number(searchParams.get('floor')) : null;
+  const { filters, setFilter } = useBookingFilters();
+  const { rooms, reservations, book, isPending } = useRoomBooking(filters.date);
 
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const setParam = (key: string, value: string | null) => {
-    setSearchParams(prev => {
-      if (value === null || value === '') {
-        prev.delete(key);
-        return prev
-      } 
-      
-      prev.set(key, value);
-      
-      return prev;
-    }, { replace: true });
-  };
-
-  const { data: rooms = [] } = useQuery({ queryKey: ['rooms'], queryFn: getRooms });
-  const { data: reservations = [] } = useQuery({ queryKey: ['reservations', date], queryFn: () => getReservations(date), enabled: !!date });
-
-  const createMutation = useMutation({
-    mutationFn: (data: { roomId: string; date: string; start: string; end: string; attendees: number; equipment: string[] }) =>
-      createReservation(data),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['reservations', variables.date] });
-      queryClient.invalidateQueries({ queryKey: ['myReservations'] });
-    },
-  });
-
-  // 필터 변경 시 선택 초기화
   const handleFilterChange = () => {
     setSelectedRoomId(null);
     setErrorMessage(null);
   };
 
-  // 입력 검증
-  let validationError: string | null = null;
-  const hasTimeInputs = startTime !== '' && endTime !== '';
-  if (hasTimeInputs) {
-    if (endTime <= startTime) {
-      validationError = '종료 시간은 시작 시간보다 늦어야 합니다.';
-    } else if (attendees < 1) {
-      validationError = '참석 인원은 1명 이상이어야 합니다.';
-    }
-  }
-  const isFilterComplete = hasTimeInputs && !validationError;
+  const { isComplete: isFilterComplete, error: validationError } = validateBookingFilter(
+    filters.startTime,
+    filters.endTime,
+    filters.attendees
+  );
 
-  // 필터링
-  const floors = [...new Set(rooms.map((r: { floor: number }) => r.floor))].sort((a: number, b: number) => a - b);
+  const floors = [...new Set(rooms.map((r: { floor: number }) => r.floor))].sort(
+    (a: number, b: number) => a - b
+  );
 
-  const availableRooms = isFilterComplete
-    ? rooms
-        .filter((room: { id: string; capacity: number; equipment: string[]; floor: number }) => {
-          if (room.capacity < attendees) return false;
-          if (!equipment.every(eq => room.equipment.includes(eq))) return false;
-          if (preferredFloor !== null && room.floor !== preferredFloor) return false;
-          const hasConflict = reservations.some(
-            (r: { roomId: string; date: string; start: string; end: string }) =>
-              r.roomId === room.id && r.date === date && r.start < endTime && r.end > startTime
-          );
-          if (hasConflict) return false;
-          return true;
-        })
-        .sort((a: { floor: number; name: string }, b: { floor: number; name: string }) => {
-          if (a.floor !== b.floor) return a.floor - b.floor;
-          return a.name.localeCompare(b.name);
-        })
-    : [];
+  const availableRooms = isFilterComplete ? getAvailableRooms(rooms, reservations, filters) : [];
 
   const handleBook = async () => {
     if (!selectedRoomId) {
       setErrorMessage('회의실을 선택해주세요.');
       return;
     }
-    if (!startTime || !endTime) {
+    if (!filters.startTime || !filters.endTime) {
       setErrorMessage('시작 시간과 종료 시간을 선택해주세요.');
       return;
     }
 
-    try {
-      const result = await createMutation.mutateAsync({
-        roomId: selectedRoomId,
-        date,
-        start: startTime,
-        end: endTime,
-        attendees,
-        equipment,
-      });
+    const result = await book({
+      roomId: selectedRoomId,
+      date: filters.date,
+      start: filters.startTime,
+      end: filters.endTime,
+      attendees: filters.attendees,
+      equipment: filters.equipment,
+    });
 
-      if ('ok' in result && result.ok) {
-        navigate('/', { state: { message: '예약이 완료되었습니다!' } });
-        return;
-      }
-
-      const errResult = result as { message?: string };
-      setErrorMessage(errResult.message ?? '예약에 실패했습니다.');
-      setSelectedRoomId(null);
-    } catch (err: unknown) {
-      let serverMessage = '예약에 실패했습니다.';
-      if (axios.isAxiosError(err)) {
-        const data = err.response?.data as { message?: string } | undefined;
-        serverMessage = data?.message ?? serverMessage;
-      }
-      setErrorMessage(serverMessage);
+    if (!result.ok) {
+      setErrorMessage(result.message);
       setSelectedRoomId(null);
     }
   };
@@ -177,9 +108,9 @@ export function RoomBookingPage() {
           <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>날짜</Text>
           <input
             type="date"
-            value={date}
+            value={filters.date}
             min={formatDate(new Date())}
-            onChange={e => { setParam('date', e.target.value); handleFilterChange(); }}
+            onChange={e => { setFilter('date', e.target.value); handleFilterChange(); }}
             aria-label="날짜"
             css={css`
               box-sizing: border-box; font-size: 16px; font-weight: 500; line-height: 1.5; height: 48px;
@@ -196,8 +127,8 @@ export function RoomBookingPage() {
           <div css={css`display: flex; flex-direction: column; gap: 6px; flex: 1;`}>
             <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>시작 시간</Text>
             <Select
-              value={startTime}
-              onChange={e => { setParam('startTime', e.target.value); handleFilterChange(); }}
+              value={filters.startTime}
+              onChange={e => { setFilter('startTime', e.target.value); handleFilterChange(); }}
               aria-label="시작 시간"
             >
               <option value="">선택</option>
@@ -209,8 +140,8 @@ export function RoomBookingPage() {
           <div css={css`display: flex; flex-direction: column; gap: 6px; flex: 1;`}>
             <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>종료 시간</Text>
             <Select
-              value={endTime}
-              onChange={e => { setParam('endTime', e.target.value); handleFilterChange(); }}
+              value={filters.endTime}
+              onChange={e => { setFilter('endTime', e.target.value); handleFilterChange(); }}
               aria-label="종료 시간"
             >
               <option value="">선택</option>
@@ -229,8 +160,8 @@ export function RoomBookingPage() {
             <input
               type="number"
               min={1}
-              value={attendees}
-              onChange={e => { setParam('attendees', String(Math.max(1, Number(e.target.value)))); handleFilterChange(); }}
+              value={filters.attendees}
+              onChange={e => { setFilter('attendees', String(Math.max(1, Number(e.target.value)))); handleFilterChange(); }}
               aria-label="참석 인원"
               css={css`
                 box-sizing: border-box; font-size: 16px; font-weight: 500; line-height: 1.5; height: 48px;
@@ -243,9 +174,9 @@ export function RoomBookingPage() {
           <div css={css`display: flex; flex-direction: column; gap: 6px; flex: 1;`}>
             <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>선호 층</Text>
             <Select
-              value={preferredFloor ?? ''}
+              value={filters.floor ?? ''}
               onChange={e => {
-                setParam('floor', e.target.value || null);
+                setFilter('floor', e.target.value || null);
                 handleFilterChange();
               }}
               aria-label="선호 층"
@@ -265,14 +196,14 @@ export function RoomBookingPage() {
           <Spacing size={8} />
           <div css={css`display: flex; gap: 8px; flex-wrap: wrap;`}>
             {ALL_EQUIPMENT.map(eq => {
-              const selected = equipment.includes(eq);
+              const selected = filters.equipment.includes(eq);
               return (
                 <button
                   key={eq}
                   type="button"
                   onClick={() => {
-                    const next = selected ? equipment.filter(e => e !== eq) : [...equipment, eq];
-                    setParam('equipment', next.join(',') || null);
+                    const next = selected ? filters.equipment.filter(e => e !== eq) : [...filters.equipment, eq];
+                    setFilter('equipment', next.join(',') || null);
                     handleFilterChange();
                   }}
                   aria-label={EQUIPMENT_LABELS[eq]}
@@ -365,8 +296,8 @@ export function RoomBookingPage() {
           )}
 
           <Spacing size={16} />
-          <Button display="full" onClick={handleBook} disabled={createMutation.isPending}>
-            {createMutation.isPending ? '예약 중...' : '확정'}
+          <Button display="full" onClick={handleBook} disabled={isPending}>
+            {isPending ? '예약 중...' : '확정'}
           </Button>
         </div>
       )}
