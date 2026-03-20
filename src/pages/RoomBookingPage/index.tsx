@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Top, Spacing, Border, Button, Text, Select, ListRow } from '_tosslib/components';
@@ -16,30 +16,28 @@ export function RoomBookingPage() {
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [date, setDate] = useState(searchParams.get('date') || formatDate(new Date()));
-  const [startTime, setStartTime] = useState(searchParams.get('startTime') || '');
-  const [endTime, setEndTime] = useState(searchParams.get('endTime') || '');
-  const [attendees, setAttendees] = useState(Number(searchParams.get('attendees')) || 1);
-  const [equipment, setEquipment] = useState<string[]>(
-    searchParams.get('equipment') ? searchParams.get('equipment')!.split(',').filter(Boolean) : []
-  );
-  const [preferredFloor, setPreferredFloor] = useState<number | null>(
-    searchParams.get('floor') ? Number(searchParams.get('floor')) : null
-  );
+  const date = searchParams.get('date') || formatDate(new Date());
+  const startTime = searchParams.get('startTime') || '';
+  const endTime = searchParams.get('endTime') || '';
+  const attendees = Number(searchParams.get('attendees')) || 1;
+  const equipment = searchParams.get('equipment')?.split(',').filter(Boolean) ?? [];
+  const preferredFloor = searchParams.get('floor') ? Number(searchParams.get('floor')) : null;
+
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // URL 쿼리 파라미터 동기화
-  useEffect(() => {
-    const params: Record<string, string> = {};
-    if (date) params.date = date;
-    if (startTime) params.startTime = startTime;
-    if (endTime) params.endTime = endTime;
-    if (attendees > 1) params.attendees = String(attendees);
-    if (equipment.length > 0) params.equipment = equipment.join(',');
-    if (preferredFloor !== null) params.floor = String(preferredFloor);
-    setSearchParams(params, { replace: true });
-  }, [date, startTime, endTime, attendees, equipment, preferredFloor, setSearchParams]);
+  const setParam = (key: string, value: string | null) => {
+    setSearchParams(prev => {
+      if (value === null || value === '') {
+        prev.delete(key);
+        return prev
+      } 
+      
+      prev.set(key, value);
+      
+      return prev;
+    }, { replace: true });
+  };
 
   const { data: rooms = [] } = useQuery({ queryKey: ['rooms'], queryFn: getRooms });
   const { data: reservations = [] } = useQuery({ queryKey: ['reservations', date], queryFn: () => getReservations(date), enabled: !!date });
@@ -181,7 +179,7 @@ export function RoomBookingPage() {
             type="date"
             value={date}
             min={formatDate(new Date())}
-            onChange={e => { setDate(e.target.value); handleFilterChange(); }}
+            onChange={e => { setParam('date', e.target.value); handleFilterChange(); }}
             aria-label="날짜"
             css={css`
               box-sizing: border-box; font-size: 16px; font-weight: 500; line-height: 1.5; height: 48px;
@@ -199,7 +197,7 @@ export function RoomBookingPage() {
             <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>시작 시간</Text>
             <Select
               value={startTime}
-              onChange={e => { setStartTime(e.target.value); handleFilterChange(); }}
+              onChange={e => { setParam('startTime', e.target.value); handleFilterChange(); }}
               aria-label="시작 시간"
             >
               <option value="">선택</option>
@@ -212,7 +210,7 @@ export function RoomBookingPage() {
             <Text as="label" typography="t7" fontWeight="medium" color={colors.grey600}>종료 시간</Text>
             <Select
               value={endTime}
-              onChange={e => { setEndTime(e.target.value); handleFilterChange(); }}
+              onChange={e => { setParam('endTime', e.target.value); handleFilterChange(); }}
               aria-label="종료 시간"
             >
               <option value="">선택</option>
@@ -232,7 +230,7 @@ export function RoomBookingPage() {
               type="number"
               min={1}
               value={attendees}
-              onChange={e => { setAttendees(Math.max(1, Number(e.target.value))); handleFilterChange(); }}
+              onChange={e => { setParam('attendees', String(Math.max(1, Number(e.target.value)))); handleFilterChange(); }}
               aria-label="참석 인원"
               css={css`
                 box-sizing: border-box; font-size: 16px; font-weight: 500; line-height: 1.5; height: 48px;
@@ -247,8 +245,7 @@ export function RoomBookingPage() {
             <Select
               value={preferredFloor ?? ''}
               onChange={e => {
-                const val = e.target.value;
-                setPreferredFloor(val === '' ? null : Number(val));
+                setParam('floor', e.target.value || null);
                 handleFilterChange();
               }}
               aria-label="선호 층"
@@ -275,7 +272,7 @@ export function RoomBookingPage() {
                   type="button"
                   onClick={() => {
                     const next = selected ? equipment.filter(e => e !== eq) : [...equipment, eq];
-                    setEquipment(next);
+                    setParam('equipment', next.join(',') || null);
                     handleFilterChange();
                   }}
                   aria-label={EQUIPMENT_LABELS[eq]}
