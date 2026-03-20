@@ -368,8 +368,8 @@ export function RoomBookingPage() {
           )}
 
           <Spacing size={16} />
-          <Button display="full" onClick={handleBook} disabled={createMutation.isLoading}>
-            {createMutation.isLoading ? '예약 중...' : '확정'}
+          <Button display="full" onClick={handleBook} disabled={createMutation.isPending}>
+            {createMutation.isPending ? '예약 중...' : '확정'}
           </Button>
         </div>
       )}
