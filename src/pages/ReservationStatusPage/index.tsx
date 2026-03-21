@@ -1,14 +1,13 @@
 import { css } from '@emotion/react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Top, Spacing, Border, Button, Text, ListRow } from '_tosslib/components';
 import { SectionHeader } from 'components/SectionHeader';
 import { colors } from '_tosslib/constants/colors';
-import { getRooms, getReservations, getMyReservations, cancelReservation } from 'pages/remotes';
 import { HOUR_LABELS, TIMELINE_START, TOTAL_MINUTES ,EQUIPMENT_LABELS } from 'pages/constants';
 import { formatDate } from 'pages/utils';
 import { DateInput } from 'components/DateInput';
+import { useReservationStatus } from './useReservationStatus';
 
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
@@ -18,7 +17,6 @@ function timeToMinutes(time: string): number {
 export function ReservationStatusPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const queryClient = useQueryClient();
   const [date, setDate] = useState(formatDate(new Date()));
 
   const locationState = location.state as { message?: string } | null;
@@ -32,17 +30,7 @@ export function ReservationStatusPage() {
     }
   }, [locationState]);
 
-  const { data: rooms = [] } = useQuery({ queryKey: ['rooms'], queryFn: getRooms });
-  const { data: reservations = [] } = useQuery({ queryKey: ['reservations', date], queryFn: () => getReservations(date), enabled: !!date });
-  const { data: myReservationList = [] } = useQuery({ queryKey: ['myReservations'], queryFn: getMyReservations });
-
-  const cancelMutation = useMutation({
-    mutationFn: (id: string) => cancelReservation(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reservations'] });
-      queryClient.invalidateQueries({ queryKey: ['myReservations'] });
-    },
-  });
+  const { rooms, reservations, myReservationList, cancelMutation } = useReservationStatus(date);
 
   const handleCancel = async (id: string) => {
     try {
