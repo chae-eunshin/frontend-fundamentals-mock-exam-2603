@@ -1,8 +1,9 @@
 import { css } from '@emotion/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Top, Spacing, Border, Button, Text, ListRow } from '_tosslib/components';
+import { Top, Spacing, Button, Text, ListRow } from '_tosslib/components';
 import { SectionHeader } from 'components/SectionHeader';
+import { SectionDivider } from 'components/SectionDivider';
 import { colors } from '_tosslib/constants/colors';
 import { EQUIPMENT_LABELS } from 'pages/constants';
 import { useRoomBooking } from './useRoomBooking';
@@ -103,9 +104,7 @@ export function RoomBookingPage() {
         validationError={validationError}
       />
 
-      <Spacing size={24} />
-      <Border size={8} />
-      <Spacing size={24} />
+      <SectionDivider />
 
       {/* 예약 가능 회의실 목록 */}
       {isFilterComplete && (

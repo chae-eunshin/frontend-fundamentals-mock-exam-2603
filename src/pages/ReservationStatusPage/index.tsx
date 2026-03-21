@@ -1,8 +1,9 @@
 import { css } from '@emotion/react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Top, Spacing, Border, Button, Text, ListRow } from '_tosslib/components';
+import { Top, Spacing, Button, Text, ListRow } from '_tosslib/components';
 import { SectionHeader } from 'components/SectionHeader';
+import { SectionDivider } from 'components/SectionDivider';
 import { colors } from '_tosslib/constants/colors';
 import { HOUR_LABELS, TIMELINE_START, TOTAL_MINUTES ,EQUIPMENT_LABELS } from 'pages/constants';
 import { formatDate } from 'pages/utils';
@@ -61,9 +62,7 @@ export function ReservationStatusPage() {
         </div>
       </div>
 
-      <Spacing size={24} />
-      <Border size={8} />
-      <Spacing size={24} />
+      <SectionDivider />
 
       {/* 예약 현황 타임라인 */}
       <div css={css`padding: 0 24px;`}>
@@ -153,9 +152,7 @@ export function ReservationStatusPage() {
         </div>
       </div>
 
-      <Spacing size={24} />
-      <Border size={8} />
-      <Spacing size={24} />
+      <SectionDivider />
 
       {/* 메시지 배너 */}
       {message && (
@@ -233,9 +230,7 @@ export function ReservationStatusPage() {
         )}
       </div>
 
-      <Spacing size={24} />
-      <Border size={8} />
-      <Spacing size={24} />
+      <SectionDivider />
 
       {/* 예약하기 버튼 */}
       <div css={css`padding: 0 24px;`}>
