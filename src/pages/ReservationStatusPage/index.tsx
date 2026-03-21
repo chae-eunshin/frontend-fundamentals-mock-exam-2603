@@ -7,6 +7,7 @@ import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, getMyReservations, cancelReservation } from 'pages/remotes';
 import { HOUR_LABELS, TIMELINE_START, TOTAL_MINUTES ,EQUIPMENT_LABELS } from 'pages/constants';
 import { formatDate } from 'pages/utils';
+import { DateInput } from 'components/DateInput';
 
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
@@ -70,19 +71,7 @@ export function ReservationStatusPage() {
         </Text>
         <Spacing size={16} />
         <div css={css`display: flex; flex-direction: column; gap: 6px;`}>
-          <input
-            type="date"
-            value={date}
-            min={formatDate(new Date())}
-            onChange={e => setDate(e.target.value)}
-            aria-label="날짜"
-            css={css`
-              box-sizing: border-box; font-size: 16px; font-weight: 500; line-height: 1.5; height: 48px;
-              background-color: ${colors.grey50}; border-radius: 12px; color: ${colors.grey800};
-              width: 100%; border: 1px solid ${colors.grey200}; padding: 0 16px; outline: none;
-              transition: border-color 0.15s; &:focus { border-color: ${colors.blue500}; }
-            `}
-          />
+          <DateInput value={date} onChange={setDate} />
         </div>
       </div>
 
