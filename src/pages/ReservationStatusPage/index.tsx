@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Top, Spacing, Border, Button, Text, ListRow } from '_tosslib/components';
+import { SectionHeader } from 'components/SectionHeader';
 import { colors } from '_tosslib/constants/colors';
 import { getRooms, getReservations, getMyReservations, cancelReservation } from 'pages/remotes';
 import { HOUR_LABELS, TIMELINE_START, TOTAL_MINUTES ,EQUIPMENT_LABELS } from 'pages/constants';
@@ -66,10 +67,7 @@ export function ReservationStatusPage() {
 
       {/* 날짜 선택 */}
       <div css={css`padding: 0 24px;`}>
-        <Text typography="t5" fontWeight="bold" color={colors.grey900}>
-          날짜 선택
-        </Text>
-        <Spacing size={16} />
+        <SectionHeader title="날짜 선택" />
         <div css={css`display: flex; flex-direction: column; gap: 6px;`}>
           <DateInput value={date} onChange={setDate} />
         </div>
@@ -81,10 +79,7 @@ export function ReservationStatusPage() {
 
       {/* 예약 현황 타임라인 */}
       <div css={css`padding: 0 24px;`}>
-        <Text typography="t5" fontWeight="bold" color={colors.grey900}>
-          예약 현황
-        </Text>
-        <Spacing size={16} />
+        <SectionHeader title="예약 현황" />
 
         <div css={css`background: ${colors.grey50}; border-radius: 14px; padding: 16px;`}>
           {/* 시간 헤더 */}
@@ -198,17 +193,13 @@ export function ReservationStatusPage() {
 
       {/* 내 예약 목록 */}
       <div css={css`padding: 0 24px;`}>
-        <div css={css`display: flex; align-items: baseline; gap: 6px;`}>
-          <Text typography="t5" fontWeight="bold" color={colors.grey900}>
-            내 예약
-          </Text>
-          {myReservationList.length > 0 && (
+        <SectionHeader title="내 예약">
+          {myReservationList.length > 0 ? (
             <Text typography="t7" fontWeight="medium" color={colors.grey500}>
               {myReservationList.length}건
             </Text>
-          )}
-        </div>
-        <Spacing size={16} />
+          ) : undefined}
+        </SectionHeader>
 
         {myReservationList.length === 0 ? (
           <div css={css`padding: 40px 0; text-align: center; background: ${colors.grey50}; border-radius: 14px;`}>

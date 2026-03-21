@@ -2,6 +2,7 @@ import { css } from '@emotion/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Top, Spacing, Border, Button, Text, ListRow } from '_tosslib/components';
+import { SectionHeader } from 'components/SectionHeader';
 import { colors } from '_tosslib/constants/colors';
 import { EQUIPMENT_LABELS } from 'pages/constants';
 import { useRoomBooking } from './useRoomBooking';
@@ -109,15 +110,11 @@ export function RoomBookingPage() {
       {/* 예약 가능 회의실 목록 */}
       {isFilterComplete && (
         <div css={css`padding: 0 24px;`}>
-          <div css={css`display: flex; align-items: baseline; gap: 6px;`}>
-            <Text typography="t5" fontWeight="bold" color={colors.grey900}>
-              예약 가능 회의실
-            </Text>
+          <SectionHeader title="예약 가능 회의실">
             <Text typography="t7" fontWeight="medium" color={colors.grey500}>
               {availableRooms.length}개
             </Text>
-          </div>
-          <Spacing size={16} />
+          </SectionHeader>
 
           {availableRooms.length === 0 ? (
             <div css={css`padding: 40px 0; text-align: center; background: ${colors.grey50}; border-radius: 14px;`}>

@@ -1,5 +1,6 @@
 import { css } from '@emotion/react';
 import { Spacing, Text, Select } from '_tosslib/components';
+import { SectionHeader } from 'components/SectionHeader';
 import { colors } from '_tosslib/constants/colors';
 import { TIME_SLOTS, EQUIPMENT_LABELS } from 'pages/constants';
 import { DateInput } from 'components/DateInput';
@@ -25,10 +26,7 @@ export function BookingFilterForm({
 }: BookingFilterFormProps) {
   return (
     <div css={css`padding: 0 24px;`}>
-      <Text typography="t5" fontWeight="bold" color={colors.grey900}>
-        예약 조건
-      </Text>
-      <Spacing size={16} />
+      <SectionHeader title="예약 조건" />
 
       {/* 날짜 */}
       <div css={css`display: flex; flex-direction: column; gap: 6px;`}>
