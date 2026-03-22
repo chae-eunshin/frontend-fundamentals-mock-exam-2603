@@ -1,11 +1,9 @@
-import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRooms, getReservations, createReservation } from 'pages/api';
 import { ReservationInput } from 'pages/types';
 import axios from 'axios';
 
 export function useRoomBooking(date: string) {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data: rooms = [] } = useQuery({ queryKey: ['rooms'], queryFn: getRooms });
@@ -27,7 +25,6 @@ export function useRoomBooking(date: string) {
     try {
       const result = await createMutation.mutateAsync(params);
       if ('ok' in result && result.ok) {
-        navigate('/', { state: { message: '예약이 완료되었습니다!' } });
         return { ok: true };
       }
       return { ok: false, message: (result as { message?: string }).message ?? '예약에 실패했습니다.' };

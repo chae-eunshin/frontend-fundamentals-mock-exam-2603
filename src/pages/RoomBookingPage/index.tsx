@@ -56,10 +56,12 @@ export function RoomBookingPage() {
       equipment: filters.equipment,
     });
 
-    if (!result.ok) {
-      setErrorMessage(result.message);
-      setSelectedRoomId(null);
+    if (result.ok) {
+      navigate('/', { state: { message: '예약이 완료되었습니다!' } });
+      return;
     }
+    setErrorMessage(result.message);
+    setSelectedRoomId(null);
   };
 
   return (
