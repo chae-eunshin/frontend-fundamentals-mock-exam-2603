@@ -1,12 +1,12 @@
 import { css } from '@emotion/react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Top, Spacing, Button, Text, ListRow } from '_tosslib/components';
+import { Top, Spacing, Button, Text } from '_tosslib/components';
 import { SectionHeader } from 'components/SectionHeader';
 import { SectionDivider } from 'components/SectionDivider';
 import { colors } from '_tosslib/constants/colors';
-import { EQUIPMENT_LABELS } from 'pages/constants';
 import { ReservationTimeline } from './ReservationTimeline';
+import { ReservationCard } from './ReservationCard';
 import { formatDate } from 'pages/utils';
 import { DateInput } from 'components/DateInput';
 import { useReservationStatus } from './useReservationStatus';
@@ -108,36 +108,12 @@ export function ReservationStatusPage() {
         ) : (
           <div css={css`display: flex; flex-direction: column; gap: 10px;`}>
             {myReservationList.map((res: Reservation) => (
-              <div
+              <ReservationCard
                 key={res.id}
-                css={css`padding: 14px 16px; border-radius: 14px; background: ${colors.grey50}; border: 1px solid ${colors.grey200};`}
-              >
-                <ListRow
-                  contents={
-                    <ListRow.Text2Rows
-                      top={getRoomName(res.roomId)}
-                      topProps={{ typography: 't6', fontWeight: 'bold', color: colors.grey900 }}
-                      bottom={`${res.date} ${res.start}~${res.end} · ${res.attendees}명 · ${res.equipment.map((e) => EQUIPMENT_LABELS[e]).join(', ') || '장비 없음'}`}
-                      bottomProps={{ typography: 't7', color: colors.grey600 }}
-                    />
-                  }
-                  right={
-                    <Button
-                      type="danger"
-                      style="weak"
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (window.confirm('정말 취소하시겠습니까?')) {
-                          handleCancel(res.id);
-                        }
-                      }}
-                    >
-                      취소
-                    </Button>
-                  }
-                />
-              </div>
+                reservation={res}
+                roomName={getRoomName(res.roomId)}
+                onCancel={handleCancel}
+              />
             ))}
           </div>
         )}
