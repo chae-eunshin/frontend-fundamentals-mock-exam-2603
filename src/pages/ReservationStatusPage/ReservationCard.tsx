@@ -1,8 +1,8 @@
 import { css } from '@emotion/react';
 import { Button, ListRow } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
-import { EQUIPMENT_LABELS } from 'pages/constants';
-import { Reservation } from 'pages/types';
+import { EQUIPMENT_LABELS } from 'shared/constants';
+import { Reservation } from 'shared/types';
 
 interface Props {
   reservation: Reservation;

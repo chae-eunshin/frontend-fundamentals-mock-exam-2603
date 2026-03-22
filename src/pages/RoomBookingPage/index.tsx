@@ -5,7 +5,7 @@ import { Top, Spacing, Button, Text } from '_tosslib/components';
 import { SectionHeader } from 'components/SectionHeader';
 import { SectionDivider } from 'components/SectionDivider';
 import { colors } from '_tosslib/constants/colors';
-import { Room } from 'pages/types';
+import { Room } from 'shared/types';
 import { useRoomBooking } from './useRoomBooking';
 import { useBookingFilters } from './useBookingFilters';
 import { validateBookingFilter, getAvailableRooms } from './utils';

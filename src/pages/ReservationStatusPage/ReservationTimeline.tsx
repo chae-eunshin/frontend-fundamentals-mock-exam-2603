@@ -2,8 +2,8 @@ import { css } from '@emotion/react';
 import { useState } from 'react';
 import { Text } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
-import { HOUR_LABELS, TOTAL_MINUTES, TIMELINE_START, EQUIPMENT_LABELS } from 'pages/constants';
-import { Room, Reservation } from 'pages/types';
+import { HOUR_LABELS, TOTAL_MINUTES, TIMELINE_START, EQUIPMENT_LABELS } from 'shared/constants';
+import { Room, Reservation } from 'shared/types';
 
 interface Props {
   rooms: Room[];

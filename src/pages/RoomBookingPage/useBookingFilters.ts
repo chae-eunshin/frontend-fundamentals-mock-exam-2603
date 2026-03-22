@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
-import { formatDate } from 'pages/utils';
+import { formatDate } from 'shared/utils';
 
 export type BookingFilters = {
   date: string;

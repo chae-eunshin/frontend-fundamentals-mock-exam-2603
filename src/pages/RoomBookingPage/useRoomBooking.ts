@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getRooms, getReservations, createReservation } from 'pages/api';
-import { ReservationInput } from 'pages/types';
+import { getRooms, getReservations, createReservation } from 'api';
+import { ReservationInput } from 'shared/types';
 import axios from 'axios';
 
 export function useRoomBooking(date: string) {

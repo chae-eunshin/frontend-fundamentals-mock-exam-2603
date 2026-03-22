@@ -1,5 +1,5 @@
-import { http } from 'pages/apiClient';
-import { Room, Reservation, ReservationInput } from 'pages/types';
+import { http } from './apiClient';
+import { Room, Reservation, ReservationInput } from 'shared/types';
 
 export function getRooms() {
   return http.get<Room[]>('/api/rooms');

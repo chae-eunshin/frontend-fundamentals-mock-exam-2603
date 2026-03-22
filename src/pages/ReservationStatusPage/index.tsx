@@ -7,10 +7,10 @@ import { SectionDivider } from 'components/SectionDivider';
 import { colors } from '_tosslib/constants/colors';
 import { ReservationTimeline } from './ReservationTimeline';
 import { ReservationCard } from './ReservationCard';
-import { formatDate } from 'pages/utils';
+import { formatDate } from 'shared/utils';
 import { DateInput } from 'components/DateInput';
 import { useReservationStatus } from './useReservationStatus';
-import { Room, Reservation } from 'pages/types';
+import { Room, Reservation } from 'shared/types';
 import { MessageBanner } from 'components/MessageBanner';
 
 export function ReservationStatusPage() {

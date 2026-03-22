@@ -1,8 +1,8 @@
 import { css } from '@emotion/react';
 import { Text, ListRow } from '_tosslib/components';
 import { colors } from '_tosslib/constants/colors';
-import { EQUIPMENT_LABELS } from 'pages/constants';
-import { Room } from 'pages/types';
+import { EQUIPMENT_LABELS } from 'shared/constants';
+import { Room } from 'shared/types';
 
 interface Props {
   room: Room;
