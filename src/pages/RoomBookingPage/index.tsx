@@ -1,15 +1,16 @@
 import { css } from '@emotion/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Top, Spacing, Button, Text, ListRow } from '_tosslib/components';
+import { Top, Spacing, Button, Text } from '_tosslib/components';
 import { SectionHeader } from 'components/SectionHeader';
 import { SectionDivider } from 'components/SectionDivider';
 import { colors } from '_tosslib/constants/colors';
-import { EQUIPMENT_LABELS } from 'pages/constants';
+import { Room } from 'pages/types';
 import { useRoomBooking } from './useRoomBooking';
 import { useBookingFilters } from './useBookingFilters';
 import { validateBookingFilter, getAvailableRooms } from './utils';
 import { BookingFilterForm } from './BookingFilterForm';
+import { RoomCard } from './RoomCard';
 
 export function RoomBookingPage() {
   const navigate = useNavigate();
@@ -123,42 +124,14 @@ export function RoomBookingPage() {
             </div>
           ) : (
             <div css={css`display: flex; flex-direction: column; gap: 10px;`}>
-              {availableRooms.map((room: { id: string; name: string; floor: number; capacity: number; equipment: string[] }) => {
-                const isSelected = selectedRoomId === room.id;
-                const equipmentLabels = room.equipment.map((e: string) => EQUIPMENT_LABELS[e]).join(', ');
-                return (
-                  <div
-                    key={room.id}
-                    onClick={() => setSelectedRoomId(room.id)}
-                    role="button"
-                    aria-pressed={isSelected}
-                    aria-label={room.name}
-                    css={css`
-                      cursor: pointer; padding: 14px 16px; border-radius: 14px;
-                      border: 2px solid ${isSelected ? colors.blue500 : colors.grey200};
-                      background: ${isSelected ? colors.blue50 : colors.white};
-                      transition: all 0.15s;
-                      &:hover { border-color: ${isSelected ? colors.blue500 : colors.grey300}; }
-                    `}
-                  >
-                    <ListRow
-                      contents={
-                        <ListRow.Text2Rows
-                          top={room.name}
-                          topProps={{ typography: 't6', fontWeight: 'bold', color: colors.grey900 }}
-                          bottom={ `${room.floor}층 · ${room.capacity}명 · ${equipmentLabels}`}
-                          bottomProps={{ typography: 't7', color: colors.grey600 }}
-                        />
-                      }
-                      right={
-                        isSelected ? (
-                          <Text typography="t7" fontWeight="bold" color={colors.blue500}>선택됨</Text>
-                        ) : undefined
-                      }
-                    />
-                  </div>
-                );
-              })}
+              {availableRooms.map((room: Room) => (
+                <RoomCard
+                  key={room.id}
+                  room={room}
+                  isSelected={selectedRoomId === room.id}
+                  onClick={() => setSelectedRoomId(room.id)}
+                />
+              ))}
             </div>
           )}
 
