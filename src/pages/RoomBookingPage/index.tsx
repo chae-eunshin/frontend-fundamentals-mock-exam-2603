@@ -125,6 +125,7 @@ export function RoomBookingPage() {
             <div css={css`display: flex; flex-direction: column; gap: 10px;`}>
               {availableRooms.map((room: { id: string; name: string; floor: number; capacity: number; equipment: string[] }) => {
                 const isSelected = selectedRoomId === room.id;
+                const equipmentLabels = room.equipment.map((e: string) => EQUIPMENT_LABELS[e]).join(', ');
                 return (
                   <div
                     key={room.id}
@@ -145,7 +146,7 @@ export function RoomBookingPage() {
                         <ListRow.Text2Rows
                           top={room.name}
                           topProps={{ typography: 't6', fontWeight: 'bold', color: colors.grey900 }}
-                          bottom={`${room.floor}층 · ${room.capacity}명 · ${room.equipment.map((e: string) => EQUIPMENT_LABELS[e]).join(', ')}`}
+                          bottom={ `${room.floor}층 · ${room.capacity}명 · ${equipmentLabels}`}
                           bottomProps={{ typography: 't7', color: colors.grey600 }}
                         />
                       }
