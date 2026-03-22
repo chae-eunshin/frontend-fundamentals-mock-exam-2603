@@ -1,4 +1,4 @@
-import { http } from 'pages/http';
+import { http } from 'pages/apiClient';
 import { Room, Reservation, ReservationInput } from 'pages/types';
 
 export function getRooms() {
