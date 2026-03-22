@@ -1,16 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRooms, getReservations, createReservation } from 'pages/remotes';
+import { ReservationInput } from 'pages/types';
 import axios from 'axios';
-
-type BookParams = {
-  roomId: string;
-  date: string;
-  start: string;
-  end: string;
-  attendees: number;
-  equipment: string[];
-};
 
 export function useRoomBooking(date: string) {
   const navigate = useNavigate();
@@ -31,7 +23,7 @@ export function useRoomBooking(date: string) {
     },
   });
 
-  const book = async (params: BookParams): Promise<{ ok: true } | { ok: false; message: string }> => {
+  const book = async (params: ReservationInput): Promise<{ ok: true } | { ok: false; message: string }> => {
     try {
       const result = await createMutation.mutateAsync(params);
       if ('ok' in result && result.ok) {
