@@ -11,6 +11,7 @@ import { useBookingFilters } from './useBookingFilters';
 import { validateBookingFilter, getAvailableRooms } from './utils';
 import { BookingFilterForm } from './BookingFilterForm';
 import { RoomCard } from './RoomCard';
+import { MessageBanner } from 'components/MessageBanner';
 
 export function RoomBookingPage() {
   const navigate = useNavigate();
@@ -82,14 +83,7 @@ export function RoomBookingPage() {
       {errorMessage && (
         <div css={css`padding: 0 24px;`}>
           <Spacing size={12} />
-          <div
-            css={css`
-              padding: 10px 14px; border-radius: 10px; background: ${colors.red50};
-              display: flex; align-items: center; gap: 8px;
-            `}
-          >
-            <Text typography="t7" fontWeight="medium" color={colors.red500}>{errorMessage}</Text>
-          </div>
+          <MessageBanner message={{ type: 'error', text: errorMessage }} />
         </div>
       )}
 
