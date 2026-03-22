@@ -42,10 +42,6 @@ export function RoomBookingPage() {
       setErrorMessage('회의실을 선택해주세요.');
       return;
     }
-    if (!filters.startTime || !filters.endTime) {
-      setErrorMessage('시작 시간과 종료 시간을 선택해주세요.');
-      return;
-    }
 
     const result = await book({
       roomId: selectedRoomId,
